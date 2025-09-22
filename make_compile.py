@@ -29,8 +29,11 @@ if __name__ == "__main__":
         n_cpu = cpu_count()
         print("Configure project.")
         execute(
-            f"cd {ffmpeg_dir} && ./configure --enable-cross-compile --prefix={target_dir / ('install_' + arch + '/')} "
-            f"--enable-shared --disable-static --arch={arch} --cc='clang -arch {arch}'"
+            f"cd {ffmpeg_dir} && ./configure "
+            f" --extra-cflags='-mmacosx-version-min=10.15 -arch {arch}'"
+            f" --extra-ldflags='-mmacosx-version-min=10.15 -arch {arch}' --disable-x86asm "
+            f" --enable-cross-compile --prefix={target_dir / ('install_' + arch + '/')} "
+            f" --enable-shared --disable-static --arch={arch} --cc='clang -arch {arch}'"
         )
         print(f"Make project ({n_cpu} threads).")
         execute(f"cd {ffmpeg_dir} && make -j{n_cpu}")

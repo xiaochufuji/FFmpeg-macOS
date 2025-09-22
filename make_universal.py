@@ -15,13 +15,29 @@ def create_universal_binary(x86_path, arm_path, universal_path):
 
     with os.popen(f"otool -L {arm_path}") as p:
         query_out = p.readlines()
-    execute(f"install_name_tool {universal_path} -id {universal_path}")
+    execute(f"install_name_tool {universal_path} -id @rpath/{os.path.basename(universal_path)}")
     for line in query_out:
         line = line.strip().split(" ")[0]
         if "install_arm64" in line:
             execute(
                 f"install_name_tool {universal_path} "
-                f"-change {line} {line.replace('install_arm64', 'install_universal')}"
+                f"-change {line} @rpath/{os.path.basename(line)}"
+            )
+            execute(
+                f"install_name_tool {universal_path} "
+                f"-add_rpath @loader_path/"
+            )
+            execute(
+                f"install_name_tool {universal_path} "
+                f"-add_rpath @loader_path/../lib"
+            )
+            execute(
+                f"install_name_tool {universal_path} "
+                f"-add_rpath @loader_path/Libraries"
+            )
+            execute(
+                f"install_name_tool {universal_path} "
+                f"-add_rpath @executable_path/../Frameworks"
             )
 
     with os.popen(f"otool -L {x86_path}") as p:
@@ -31,7 +47,23 @@ def create_universal_binary(x86_path, arm_path, universal_path):
         if "install_x86_64" in line:
             execute(
                 f"install_name_tool {universal_path} "
-                f"-change {line} {line.replace('install_x86_64', 'install_universal')}"
+                f"-change {line} @rpath/{os.path.basename(line)}"
+            )
+            execute(
+                f"install_name_tool {universal_path} "
+                f"-add_rpath @loader_path/"
+            )
+            execute(
+                f"install_name_tool {universal_path} "
+                f"-add_rpath @loader_path/../lib"
+            )
+            execute(
+                f"install_name_tool {universal_path} "
+                f"-add_rpath @loader_path/Libraries"
+            )
+            execute(
+                f"install_name_tool {universal_path} "
+                f"-add_rpath @executable_path/../Frameworks"
             )
 
 
